@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Eco-Refill — Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #EAF7F6;
+    --surface: #FFFFFF;
+    --ink: #0B3B3C;
+    --ink-soft: #4C6E6F;
+    --teal: #0F8B8D;
+    --teal-deep: #0A6567;
+    --amber: #F2A93B;
+    --coral: #E85D4C;
+    --mist: #C9E8E6;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0 8px;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    color: var(--teal-deep);
+  }
+  .logo span { color: var(--amber); }
+  .status-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--mist);
+    color: var(--ink-soft);
+  }
+  .status-pill.connected { color: var(--teal-deep); border-color: var(--teal); }
+  .status-pill.error { color: var(--coral); border-color: var(--coral); }
+
+  /* ---------- Hero gauge ---------- */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    padding: 36px 8px 20px;
+    flex-wrap: wrap;
+  }
+  .gauge {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: conic-gradient(var(--teal) calc(var(--gauge-pct, 0) * 1%), var(--mist) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.6s ease;
+  }
+  .gauge-inner {
+    width: 144px;
+    height: 144px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .gauge-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 34px;
+    color: var(--teal-deep);
+    line-height: 1;
+  }
+  .gauge-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    text-align: center;
+  }
+  .hero-copy h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    margin: 0 0 8px;
+    max-width: 420px;
+  }
+  .hero-copy p {
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 420px;
+    line-height: 1.5;
+  }
+
+  /* ---------- Wave divider ---------- */
+  .wave { display: block; width: 100%; height: 32px; margin: 12px 0 28px; }
+  .wave path { fill: var(--mist); }
+
+  /* ---------- Cards / grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--mist);
+  }
+  .card h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .card .sub { color: var(--ink-soft); font-size: 13px; margin: 0 0 18px; }
+
+  .field-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  input, select {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--mist);
+    background: var(--bg);
+    color: var(--ink);
+    width: 100%;
+  }
+  input:focus, select:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+  button {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: var(--teal);
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+  }
+  button:hover { background: var(--teal-deep); }
+  button.secondary { background: var(--amber); color: #3A2600; }
+  button.secondary:hover { background: #d9962f; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .user-result {
+    margin-top: 6px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--mist);
+  }
+  .stat-row { display: flex; justify-content: space-between; padding: 6px 0; }
+  .stat-row .k { color: var(--ink-soft); font-size: 13px; }
+  .stat-row .v { font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+  .empty-note { color: var(--ink-soft); font-size: 13px; font-style: italic; }
+
+  /* ---------- Leaderboard ---------- */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); padding: 6px 4px; border-bottom: 1px solid var(--mist); }
+  td { padding: 10px 4px; border-bottom: 1px solid var(--mist); font-size: 14px; }
+  tr:last-child td { border-bottom: none; }
+  .rank { font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft); width: 28px; }
+  .rank.gold { color: #B8860B; font-weight: 700; }
+  .rank.silver { color: #7A8B94; font-weight: 700; }
+  .rank.bronze { color: #A0622D; font-weight: 700; }
+  .points-cell { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--teal-deep); text-align: right; }
+
+  /* ---------- Simulate panel ---------- */
+  .sim-panel {
+    background: var(--ink);
+    color: #E8F5F5;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 24px;
+  }
+  .sim-panel h2 { color: white; font-family: 'Fraunces', serif; font-size: 18px; margin: 0 0 4px; }
+  .sim-panel .sub { color: #9FC7C8; font-size: 13px; margin: 0 0 18px; }
+  .sim-panel input, .sim-panel select {
+    background: #123B3C;
+    border: 1px solid #1E5657;
+    color: #E8F5F5;
+  }
+  .sim-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; }
+  @media (max-width: 640px) { .sim-grid { grid-template-columns: 1fr; } }
+  .sim-grid label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #9FC7C8; margin-bottom: 6px; }
+  .sim-msg { margin-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 10px 12px; border-radius: 8px; display: none; }
+  .sim-msg.ok { background: rgba(15,139,141,0.25); color: #7EE0D8; display: block; }
+  .sim-msg.err { background: rgba(232,93,76,0.2); color: #FFB3A6; display: block; }
+
+  /* ---------- Activity feed ---------- */
+  .activity-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--mist);
+    font-size: 13px;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item .who { font-weight: 600; }
+  .activity-item .meta { color: var(--ink-soft); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+  footer { text-align: center; color: var(--ink-soft); font-size: 12px; padding-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="logo">ECO<span>TAP</span></div>
+    <div id="statusPill" class="status-pill">checking connection…</div>
+  </header>
+
+  <section class="hero">
+    <div class="gauge" id="gaugeRing">
+      <div class="gauge-inner">
+        <div class="gauge-num" id="gaugeNum">0</div>
+        <div class="gauge-label">liters saved<br>today</div>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <h1>Every tap, one less bottle.</h1>
+      <p>Live telemetry from the Smart Eco-Refill station — tap your RFID tag at the fountain, and your points update here in real time.</p>
+    </div>
+  </section>
+
+  <svg class="wave" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0,20 C150,40 350,0 600,20 C850,40 1050,0 1200,20 L1200,40 L0,40 Z"></path></svg>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>Find your stats</h2>
+      <p class="sub">Enter the RFID tag ID printed on your sticker or school ID.</p>
+      <div class="field-row">
+        <input id="lookupTag" type="text" placeholder="e.g. TAG-DEMO-001" />
+        <button onclick="lookupUser()">Look up</button>
+      </div>
+      <div id="userResult"></div>
+    </div>
+
+    <div class="card">
+      <h2>Campus leaderboard</h2>
+      <p class="sub">Ranked by total points earned.</p>
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th style="text-align:right">Points</th></tr></thead>
+        <tbody id="leaderboardBody">
+          <tr><td colspan="3" class="empty-note">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="card" style="margin-top:24px;">
+    <h2>Recent activity</h2>
+    <p class="sub">Live feed of refill events as they're logged.</p>
+    <div id="activityFeed"><p class="empty-note">No refills logged yet.</p></div>
+  </div>
+
+  <div class="sim-panel">
+    <h2>Simulate device (no hardware needed yet)</h2>
+    <p class="sub">This sends the exact same request your ESP32 will send once it's built — useful for testing the full pipeline right now.</p>
+    <div class="sim-grid">
+      <div>
+        <label>RFID tag</label>
+        <select id="simTag">
+          <option value="TAG-DEMO-001">TAG-DEMO-001 — Juan Dela Cruz</option>
+          <option value="TAG-DEMO-002">TAG-DEMO-002 — Maria Santos</option>
+          <option value="TAG-DEMO-003">TAG-DEMO-003 — Jose Rizal</option>
+        </select>
+      </div>
+      <div>
+        <label>Volume (mL)</label>
+        <input id="simVolume" type="number" value="500" min="1" max="5000" />
+      </div>
+      <button class="secondary" onclick="simulateRefill()">Tap to simulate refill</button>
+    </div>
+    <div id="simMsg" class="sim-msg"></div>
+  </div>
+
+  <footer>Smart Eco-Refill System — prototype dashboard</footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  // ============================================================
+  // CONFIG — paste your own values from Supabase Project Settings > API
+  // ============================================================
+  const SUPABASE_URL = "https://YOUR-PROJECT-ID.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR-ANON-PUBLIC-KEY";
+  // ============================================================
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const statusPill = document.getElementById('statusPill');
+
+  async function checkConnection() {
+    const { error } = await sb.from('users').select('id').limit(1);
+    if (error) {
+      statusPill.textContent = 'not connected — check config';
+      statusPill.className = 'status-pill error';
+      console.error(error);
+    } else {
+      statusPill.textContent = 'connected to supabase';
+      statusPill.className = 'status-pill connected';
+    }
+  }
+
+  async function lookupUser() {
+    const tag = document.getElementById('lookupTag').value.trim();
+    const resultBox = document.getElementById('userResult');
+    if (!tag) return;
+
+    const { data, error } = await sb.from('users').select('*').eq('rfid_tag', tag).single();
+    if (error || !data) {
+      resultBox.innerHTML = `<div class="user-result"><p class="empty-note">No user found for that tag.</p></div>`;
+      return;
+    }
+    resultBox.innerHTML = `
+      <div class="user-result">
+        <div class="stat-row"><span class="k">Name</span><span class="v">${data.full_name}</span></div>
+        <div class="stat-row"><span class="k">Points</span><span class="v">${data.points}</span></div>
+        <div class="stat-row"><span class="k">Total liters</span><span class="v">${(data.total_ml/1000).toFixed(2)} L</span></div>
+        <div class="stat-row"><span class="k">Bottles saved</span><span class="v">${data.bottles_saved}</span></div>
+      </div>`;
+  }
+
+  async function loadLeaderboard() {
+    const { data, error } = await sb.from('users').select('*').order('points', { ascending: false }).limit(10);
+    const body = document.getElementById('leaderboardBody');
+    if (error || !data || data.length === 0) {
+      body.innerHTML = `<tr><td colspan="3" class="empty-note">No users yet.</td></tr>`;
+      return;
+    }
+    const medalClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    body.innerHTML = data.map((u, i) => `
+      <tr>
+        <td class="rank ${medalClass(i)}">${i + 1}</td>
+        <td>${u.full_name}</td>
+        <td class="points-cell">${u.points}</td>
+      </tr>`).join('');
+  }
+
+  async function loadGauge() {
+    const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+    const { data, error } = await sb.from('refills').select('volume_ml').gte('created_at', startOfDay.toISOString());
+    const totalMl = (data || []).reduce((sum, r) => sum + Number(r.volume_ml), 0);
+    const liters = (totalMl / 1000);
+    document.getElementById('gaugeNum').textContent = liters.toFixed(1);
+    const pct = Math.min(100, (liters / 10) * 100); // gauge fills up to a 10L/day visual target — adjust as needed
+    document.getElementById('gaugeRing').style.setProperty('--gauge-pct', pct);
+  }
+
+  async function loadActivity() {
+    const { data, error } = await sb
+      .from('refills')
+      .select('rfid_tag, volume_ml, points_earned, created_at, users(full_name)')
+      .order('created_at', { ascending: false })
+      .limit(8);
+    const feed = document.getElementById('activityFeed');
+    if (error || !data || data.length === 0) {
+      feed.innerHTML = `<p class="empty-note">No refills logged yet.</p>`;
+      return;
+    }
+    feed.innerHTML = data.map(r => `
+      <div class="activity-item">
+        <span class="who">${(r.users && r.users.full_name) || r.rfid_tag} — ${r.volume_ml} mL</span>
+        <span class="meta">+${r.points_earned} pts · ${new Date(r.created_at).toLocaleTimeString()}</span>
+      </div>`).join('');
+  }
+
+  async function simulateRefill() {
+    const tag = document.getElementById('simTag').value;
+    const volume = Number(document.getElementById('simVolume').value);
+    const msg = document.getElementById('simMsg');
+
+    const { error } = await sb.from('refills').insert({ rfid_tag: tag, volume_ml: volume });
+
+    if (error) {
+      msg.className = 'sim-msg err';
+      msg.textContent = `Blocked: ${error.message}`;
+    } else {
+      msg.className = 'sim-msg ok';
+      msg.textContent = `Simulated refill logged for ${tag} (${volume} mL). Dashboard updating…`;
+      refreshAll();
+    }
+  }
+
+  function refreshAll() {
+    loadLeaderboard();
+    loadGauge();
+    loadActivity();
+  }
+
+  // Live updates: refresh the moment any new refill is inserted (e.g. by the
+  // real ESP32, by a teammate testing from another laptop, or by this panel).
+  sb.channel('refills-changes')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'refills' }, () => {
+      refreshAll();
+    })
+    .subscribe();
+
+  checkConnection();
+  refreshAll();
+</script>
+
+</body>
+</html>
