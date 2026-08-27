@@ -26,7 +26,7 @@ create table if not exists users (
 create table if not exists refills (
   id            uuid primary key default gen_random_uuid(),
   rfid_tag      text not null references users(rfid_tag),
-  volume_ml     numeric not null check (volume_ml > 0 and volume_ml <= 4000),
+  volume_ml     numeric not null check (volume_ml > 0 and volume_ml <= 5000),
   points_earned integer not null default 0,    -- filled in automatically, see trigger below
   device_id     text default 'esp32-prototype-01',
   created_at    timestamptz not null default now()
